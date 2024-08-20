@@ -22,5 +22,6 @@ export interface SigningOrder {
     signingAddressZipcode: string;
     signingAddressCompany: string;
     specialInstructions: string;
+    hasBeenImported: boolean;
 
 }

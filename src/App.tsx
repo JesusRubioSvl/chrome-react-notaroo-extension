@@ -2,34 +2,59 @@ import {useState, useEffect} from 'react';
 import './App.css';
 import { DOMMessage, DOMMessageResponse } from './types';
 import FileLoad from './code/FileLoad';
+import {SigningOrder} from './models/signingOrder';
+import FileDisplay from './code/FileDisplay';
 
 function App() {
-  const [title, setTitle] = useState('');
-  const [headlines, setHeadlines] = useState<string[]>([]);
-  const [file, setFile] = useState<File | null>();
   const [fileName, setFileName] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Array<SigningOrder>>([]);
+  const [insertOrder, setInsertOrder] = useState<SigningOrder | null>(null);
 
-  const handleFileLoad = (loadedFile: File) => {
-    setFile(loadedFile);
-    console.log('File received in App:', loadedFile.name);
+  const handleFileLoad = (loadedFileName: string, signingOrders: Array<SigningOrder>) => {
+    setFileName(loadedFileName);
+    setOrders(signingOrders);
     // Store the name in chrome.storage
     if(chrome.storage && chrome.storage.local){
-      chrome.storage.local.set({ fileName: loadedFile.name }, () => {
-        console.log('File content saved to chrome.storage');
+      chrome.storage.local.set({ fileName: loadedFileName }, () => {
+        console.log('File name saved to chrome.storage as:', loadedFileName);
       });
+      chrome.storage.local.set({ orders: JSON.stringify(signingOrders) }, () => {
+        console.log('Orders saved to chrome.storage - ', signingOrders.length);
+      });
+    }
+
+    const appContainer = document.querySelector('.App');
+    if (appContainer) {
+      appContainer.classList.remove('normal-height');
     }
   };
 
   const handleClear = () => {
-    setFile(null);
     setFileName(null);
+    setOrders([]);
     console.log('File cleared');
     // Clear the file name from chrome.storage
     if(chrome.storage && chrome.storage.local){
       chrome.storage.local.remove('fileName', () => {
         console.log('File name removed from chrome.storage');
       });
+      chrome.storage.local.remove('orders', () => {
+        console.log('Orders removed from chrome.storage');
+      });
     }
+
+    const appContainer = document.querySelector('.App');
+    if (appContainer) {
+      appContainer.classList.add('normal-height');
+    }
+  };
+
+  const handleInsert = (signingOrder: SigningOrder, signingOrders: Array<SigningOrder>) => {
+    setInsertOrder(signingOrder);
+    setOrders(signingOrders);
+    chrome.storage.local.set({ orders: JSON.stringify(signingOrders) }, () => {
+      console.log('Orders saved to chrome.storage - ', signingOrders.length);
+    });
   };
 
   useEffect(() => {
@@ -39,6 +64,13 @@ function App() {
         if (result.fileName) {
           console.log('File name retrieved from chrome.storage:', result.fileName);
           setFileName(result.fileName);
+        }
+      });
+      chrome.storage.local.get('orders', (result) => {
+        if (result.orders) {
+          console.log('Orders retrieved from chrome.storage');
+          const parsedOrders: SigningOrder[] = JSON.parse(result.orders)
+          setOrders(parsedOrders);
         }
       });
     }
@@ -62,49 +94,27 @@ function App() {
        */
       chrome.tabs.sendMessage(
         tabs[0].id || 0,
-        { type: 'GET_DOM' } as DOMMessage,
-        (response: DOMMessageResponse) => {
-          setTitle(response.title);
-          setHeadlines(response.headlines);
-        });
+        { type: 'GET_DOM', order: insertOrder } as DOMMessage,
+        (response: DOMMessageResponse) => {});
     });
-  }, []);
+  }, [insertOrder]);
 
   return (
     <div className="App">
-      <h1>SEO Extension built with React!</h1>
+      <h1>Notaroo Data Loader</h1>
 
       <FileLoad 
       onFileLoad={handleFileLoad} 
-      onClear={handleClear} />
+      onClear={handleClear}
+      fileName={fileName}
+      orders={orders} />
 
-      <ul className="SEOForm">
-        <li className="SEOValidation">
-          <div className="SEOValidationField">
-            <span className="SEOValidationFieldTitle">Title</span>
-            <span className={`SEOValidationFieldStatus ${title.length < 30 || title.length > 65 ? 'Error' : 'Ok'}`}>
-              {title.length} Characters
-            </span>
-          </div>
-          <div className="SEOVAlidationFieldValue">
-            {title}
-          </div>
-        </li>
-
-        <li className="SEOValidation">
-          <div className="SEOValidationField">
-            <span className="SEOValidationFieldTitle">Main Heading</span>
-            <span className={`SEOValidationFieldStatus ${headlines.length !== 1 ? 'Error' : 'Ok'}`}>
-              {headlines.length}
-            </span>
-          </div>
-          <div className="SEOVAlidationFieldValue">
-            <ul>
-              {headlines.map((headline, index) => (<li key={index}>{headline}</li>))}
-            </ul>
-          </div>
-        </li>
-      </ul>
+      <div className="file-display-container">
+        <FileDisplay
+          orders={orders}
+          handleInsert={handleInsert}
+        />
+      </div>
     </div>
   );
 }

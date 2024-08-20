@@ -1,4 +1,4 @@
-import {ChangeEvent, useRef, useState} from 'react';
+import {ChangeEvent, useEffect, useRef, useState} from 'react';
 import Button from '@mui/material/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import * as XLSX from 'xlsx';
@@ -6,47 +6,57 @@ import './FileLoad.css';
 import {SigningOrder} from '../models/signingOrder';
 
 interface FileUploadProps {
-  onFileLoad: (file: File) => void;
+  onFileLoad: (loadedFileName: string, signingOrders: Array<SigningOrder>) => void;
   onClear: () => void;
+  fileName: string | null;
+  orders: Array<SigningOrder>;
 }
 
-const FileLoad: React.FC<FileUploadProps> = ({ onFileLoad, onClear }) => {
-  const [file, setFile] = useState<File | null>(null);
+const FileLoad: React.FC<FileUploadProps> = (props: FileUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [fileName, setFileName] = useState<string | null>(props.fileName);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file = e.target.files[0];
-      setFile(file);
-      onFileLoad(file);
-      readFile(file);
-      // Reset the file input value
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setFileName(file.name);
+      readFile(file).then((orders) => {
+        props.onFileLoad(file.name, orders);
+        // Reset the file input value
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      });
     }
   };
 
-  const readFile = (file: File) => {
+  useEffect(() => {
+    setFileName(props.fileName);
+  }, [props.fileName]);
+
+  const readFile = (file: File): Promise<SigningOrder[] | never[]> => {
     const reader = new FileReader();
+    let signingOrders: SigningOrder[] = [];
     reader.onload = (e) => {
       const data = e.target?.result;
       if (data) {
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const signingOrders: SigningOrder[] = XLSX.utils.sheet_to_json(worksheet);
-        console.log(signingOrders);
-        //onFileLoad(signingOrders);
+        signingOrders = XLSX.utils.sheet_to_json(worksheet);
+        
       }
     };
     reader.readAsBinaryString(file);
+    return new Promise<SigningOrder[] | never[]>((resolve) => {
+      reader.onloadend = () => {
+        resolve(signingOrders);
+      };
+    });
   };
 
   const handleClearClick = () => {
-    setFile(null);
-    onClear();
+    props.onClear();
   };
 
   return (
@@ -70,7 +80,7 @@ const FileLoad: React.FC<FileUploadProps> = ({ onFileLoad, onClear }) => {
             />
       </Button> 
 
-      {file && 
+      {fileName && 
       <Button 
         component="label"
         role={undefined}
@@ -86,7 +96,7 @@ const FileLoad: React.FC<FileUploadProps> = ({ onFileLoad, onClear }) => {
       }
     </div>
 
-    {file && <div>{file && `${file.name}`}</div> }
+    {fileName && <div>{`${fileName}`}</div> }
       
     </div>
   );

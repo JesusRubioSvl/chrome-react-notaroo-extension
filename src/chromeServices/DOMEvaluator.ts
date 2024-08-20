@@ -67,57 +67,54 @@ const messagesFromReactAppListener = (
   msg: DOMMessage,
   sender: chrome.runtime.MessageSender,
   sendResponse: (response: DOMMessageResponse) => void) => {
+  if(msg.order){
+    const order = msg.order;
+    const hasNickname = order.signingAddressCompany !== '';
+    const closingTimeMode = order.closingTime === undefined ? 'TBD' : 'At';
 
-  const headlines = Array.from(document.getElementsByTagName<"h1">("h1"))
-                      .map(h1 => h1.innerText);
+    modifyDOMContent('company_id', order.companyId)
+      .then(() => {
+        modifyDOMContent('escrow_number', order.escrowNumber || '');
+        modifyDOMContent('closing_date', order.closingDate || '');
+        modifyDOMContent('closing_time_mode', closingTimeMode || '');
+        modifyDOMContent('signer_name', order.signerName || '');
+        modifyDOMContent('contact_phone', order.signerPhone || '');
+        modifyDOMContent('signer_email', order.signerEmail || '');
+        modifyDOMContent('cosigner_name', order.coSignerName || '');
+        modifyDOMContent('contact_altphone1_type', order.coSignerPhone || '');
+        modifyDOMContent('cosigner_email', order.coSignerEmail || '');
+        modifyDOMContent('property_address[address1]', order.propertyAddressStreet1 || '');
+        modifyDOMContent('property_address[address2]', order.propertyAddressStreet2 || '');
+        modifyDOMContent('property_address[city]', order.propertyAddressCity || '');
+        modifyDOMContent('property_address[zone_id]', order.propertyAddressState || '');
+        modifyDOMContent('property_address[zipcode]', order.propertyAddressZipcode || '');
+        if(hasNickname) {
+          modifyDOMContent('signing_same_as_property_address', 0);
+          delay(() => modifyDOMContent('signing_address[company]', order.signingAddressCompany || ''), 500);
+          delay(() => modifyDOMContent('signing_address[address1]', order.signingAddressStreet1 || ''), 500);
+          delay(() => modifyDOMContent('signing_address[address2]', order.signingAddressStreet2 || ''), 500);
+          delay(() => modifyDOMContent('signing_address[city]', order.signingAddressCity || ''), 500);
+          delay(() => modifyDOMContent('signing_address[zone_id]', order.signingAddressState || ''), 500);
+          delay(() => modifyDOMContent('signing_address[zipcode]', order.signingAddressZipcode || ''), 500);
+        }
+        modifyDOMContent('special_instructions', order.specialInstructions || '');
+        modifyDOMContentById('special-instructions-table', '');
+        modifyDOMContentById('special-instructions-display-strong', order.specialInstructions || '');
 
-  const hasNickname = true;
-
-  modifyDOMContent('company_id', 'NCCI')
-    .then(() => {
-      modifyDOMContent('escrow_number', '12345');
-      modifyDOMContent('closing_date', '08/23/2024');
-      modifyDOMContent('closing_time_mode', 'At');
-      modifyDOMContent('signer_name', 'John Doe');
-      modifyDOMContent('contact_phone', '1234567980');
-      modifyDOMContent('signer_email', 'john.doe@email.com');
-      modifyDOMContent('cosigner_name', 'Johana Smith');
-      modifyDOMContent('contact_altphone1_type', '0987654321');
-      modifyDOMContent('cosigner_email', 'johana.smith@email.com');
-      modifyDOMContent('property_address[address1]', 'San Jose 110');
-      modifyDOMContent('property_address[address2]', 'Apt. 15');
-      modifyDOMContent('property_address[city]', 'Houston');
-      modifyDOMContent('property_address[zone_id]', 'TX');
-      modifyDOMContent('property_address[zipcode]', '88730');
-      if(hasNickname) {
-        modifyDOMContent('signing_same_as_property_address', 0);
-        delay(() => modifyDOMContent('signing_address[company]', 'Starbucks'), 500);
-        delay(() => modifyDOMContent('signing_address[address1]', 'San Diego 330'), 500);
-        delay(() => modifyDOMContent('signing_address[address2]', ''), 500);
-        delay(() => modifyDOMContent('signing_address[city]', 'Houston'), 500);
-        delay(() => modifyDOMContent('signing_address[zone_id]', 'TX'), 500);
-        delay(() => modifyDOMContent('signing_address[zipcode]', '88730'), 500);
-      }
-      modifyDOMContent('special_instructions', 'Hello world :)');
-      modifyDOMContentById('special-instructions-table', '');
-      modifyDOMContentById('special-instructions-display-strong', 'Hello world :)');
-
-      delay(() => modifyDOMContent('closing_time', '11:30AM'), 500);
-      delay(() => modifyDOMContent('signing_type', '*HUD Partial Claim - $87.00'), 1000);
-      
-    })
-    .then(() => {
+        if(closingTimeMode === 'At') {
+          delay(() => modifyDOMContent('closing_time', order.closingTime || ''), 500);
+        }
+        delay(() => modifyDOMContent('signing_type', order.signingType || ''), 1000);
+        
+      })
+      .catch(error => {
+        console.error(error);
+      });
       // Prepare the response object with information about the site
-      const response: DOMMessageResponse = {
-        title: document.title,
-        headlines
-      };
+      const response: DOMMessageResponse = {};
 
       sendResponse(response);
-    })
-    .catch(error => {
-      console.error(error);
-    });
+  }
 };
 
 // Function to inject a script into the webpage

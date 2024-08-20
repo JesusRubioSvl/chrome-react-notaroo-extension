@@ -1,6 +1,6 @@
 {
   "name": "Chrome React SEO Extension",
-  "description": "The power of React and TypeScript for building interactive Chrome extensions",
+  "description": "Notaroo Chrome Extension for loading data into Signing Order form",
   "version": "1.0",
   "manifest_version": 3,
   "action": {

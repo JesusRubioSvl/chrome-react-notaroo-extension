@@ -5,4 +5,10 @@
     margin-bottom: 1rem;
   }
 
+.filedisplay-container {
+  display: flex;
+  justify-content:end;
+  align-items: center;
+  margin-top: 0.5rem;
+}
   
