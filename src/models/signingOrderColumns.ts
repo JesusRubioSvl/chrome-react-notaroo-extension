@@ -19,10 +19,14 @@ export const SigningOrderColumns: GridColDef[] =
     { field: 'signingAddressCompany', headerName: 'Signing Address Company' },
     { field: 'signerPhone', headerName: 'Signer Phone' },
     { field: 'signerEmail', headerName: 'Signer Email' },
+    { field: 'signerSpouse', headerName: 'Signer Spouse' },
     { field: 'coSignerName', headerName: 'Co-Signer Name' },
     { field: 'coSignerPhone', headerName: 'Co-Signer Phone' },
     { field: 'coSignerEmail', headerName: 'Co-Signer Email' },
+    { field: 'coSignerSpouse', headerName: 'Co-Signer Spouse' },
+    { field: 'additionalContacts', headerName: 'Additional Contacts' },
     { field: 'signingType', headerName: 'Signing Type' },
+    { field: 'languages', headerName: 'Languages' },
     { field: 'companyId', headerName: 'Company' },
     { field: 'specialInstructions', headerName: 'Special Instructions' }
     

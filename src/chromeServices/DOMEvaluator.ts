@@ -1,5 +1,6 @@
 import { delay } from 'lodash';
 import { DOMMessage, DOMMessageResponse } from '../types';
+import { mapSigningType } from '../code/signingTypeMapper';
 
 const modifyDOMContent = (selector: string, newContent: string | number): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -13,7 +14,12 @@ const modifyDOMContent = (selector: string, newContent: string | number): Promis
           element.value = String(newContent);
           element.dispatchEvent(new Event('change', { bubbles: true }));
           resolve();
-        } else if (element instanceof HTMLSelectElement) {
+        } 
+        else if (element instanceof HTMLTextAreaElement) {
+          element.value = String(newContent);
+          resolve();
+        }
+        else if (element instanceof HTMLSelectElement) {
           const options = element.options;
           let optionFound = false;
 
@@ -49,11 +55,42 @@ const modifyDOMContentById = (selector: string, newContent: string | number): Pr
       const element = document.getElementById(selector);
       if (element) {
         if (element && element instanceof HTMLDivElement) {
-          element.style.display = 'flex';
-        }else{
+          element.style.display = 'block';
+        }
+        else if (element instanceof HTMLAnchorElement) {
+          element.dispatchEvent(new Event('click', { bubbles: true }));
+          resolve();
+        }
+        if (newContent !== '' && newContent !== undefined) {
           element.innerText = String(newContent);
         }
       } else {
+        reject(`Element with selector "${selector}" not found.`);
+      }
+    } catch (error) {
+      reject(`Error modifying DOM content: ${error}`);
+    }
+  });
+};
+
+const modifyDOMContentByClass = (selector: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const element = document.getElementsByClassName(selector);
+      if (element) {
+        if (element && element instanceof HTMLCollection) {
+          for (let i = 0; i < element.length; i++) {
+            const e = element[i];
+            if(e instanceof HTMLAnchorElement) {
+              e.dispatchEvent(new Event('click', { bubbles: true }));
+            } else if(e instanceof HTMLDivElement) {
+              e.style.display = 'block';
+            }
+          }
+          resolve();
+        }
+      }
+      else {
         reject(`Element with selector "${selector}" not found.`);
       }
     } catch (error) {
@@ -69,26 +106,41 @@ const messagesFromReactAppListener = (
   sendResponse: (response: DOMMessageResponse) => void) => {
   if(msg.order){
     const order = msg.order;
-    const hasNickname = order.signingAddressCompany !== '';
+    const hasNickname = order.signingAddressCompany !== '' && order.signingAddressCompany !== undefined;
     const closingTimeMode = order.closingTime === undefined ? 'TBD' : 'At';
+    
 
     modifyDOMContent('company_id', order.companyId)
       .then(() => {
+
+        modifyDOMContentByClass('add-spouse-btn');
+        modifyDOMContentById('show-additional-contact-info-btn', '');
+
         modifyDOMContent('escrow_number', order.escrowNumber || '');
         modifyDOMContent('closing_date', order.closingDate || '');
         modifyDOMContent('closing_time_mode', closingTimeMode || '');
+
         modifyDOMContent('signer_name', order.signerName || '');
         modifyDOMContent('contact_phone', order.signerPhone || '');
         modifyDOMContent('signer_email', order.signerEmail || '');
+        modifyDOMContent('signer_spouse_name', order.signerSpouse || '');
+
         modifyDOMContent('cosigner_name', order.coSignerName || '');
         modifyDOMContent('contact_altphone1_type', order.coSignerPhone || '');
         modifyDOMContent('cosigner_email', order.coSignerEmail || '');
+        modifyDOMContent('cosigner_spouse_name', order.coSignerSpouse || '');
+        modifyDOMContent('contact_info', order.additionalContacts || '');
+
         modifyDOMContent('property_address[address1]', order.propertyAddressStreet1 || '');
         modifyDOMContent('property_address[address2]', order.propertyAddressStreet2 || '');
         modifyDOMContent('property_address[city]', order.propertyAddressCity || '');
         modifyDOMContent('property_address[zone_id]', order.propertyAddressState || '');
         modifyDOMContent('property_address[zipcode]', order.propertyAddressZipcode || '');
-        if(hasNickname) {
+
+        if(!hasNickname) {
+          modifyDOMContent('signing_same_as_property_address', 1);
+        }
+        else{
           modifyDOMContent('signing_same_as_property_address', 0);
           delay(() => modifyDOMContent('signing_address[company]', order.signingAddressCompany || ''), 500);
           delay(() => modifyDOMContent('signing_address[address1]', order.signingAddressStreet1 || ''), 500);
@@ -101,10 +153,14 @@ const messagesFromReactAppListener = (
         modifyDOMContentById('special-instructions-table', '');
         modifyDOMContentById('special-instructions-display-strong', order.specialInstructions || '');
 
+        modifyDOMContent('language', order.languages || '');
+        modifyDOMContentById('language-table', '');
+        modifyDOMContentById('language-display', order.languages || '');
+
         if(closingTimeMode === 'At') {
           delay(() => modifyDOMContent('closing_time', order.closingTime || ''), 500);
         }
-        delay(() => modifyDOMContent('signing_type', order.signingType || ''), 1000);
+        delay(() => modifyDOMContent('signing_type', mapSigningType(order.signingType || '') ), 1000);
         
       })
       .catch(error => {

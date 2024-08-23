@@ -7,9 +7,12 @@ export interface SigningOrder {
     signerName: string;
     signerPhone: string;
     signerEmail: string;
+    signerSpouse: string;
     coSignerName: string;
     coSignerPhone: string;
     coSignerEmail: string;
+    coSignerSpouse: string;
+    additionalContacts: string;
     propertyAddressStreet1: string;
     propertyAddressStreet2: string;
     propertyAddressCity: string;
@@ -22,6 +25,7 @@ export interface SigningOrder {
     signingAddressZipcode: string;
     signingAddressCompany: string;
     specialInstructions: string;
+    languages: string;
     hasBeenImported: boolean;
 
 }
