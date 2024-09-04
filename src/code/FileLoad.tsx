@@ -34,6 +34,16 @@ const FileLoad: React.FC<FileUploadProps> = (props: FileUploadProps) => {
     setFileName(props.fileName);
   }, [props.fileName]);
 
+  const excelDateToJSDate = (date: string): string => {
+    const serial = Number(date);
+    const utc_days = Math.floor(serial - 25569);
+    const utc_value = utc_days * 86400;
+    const date_info = new Date(utc_value * 1000);
+  
+    return `${date_info.getMonth() + 1}/${date_info.getDate()+1}/${date_info.getFullYear()}`;
+  
+  };
+
   const readFile = (file: File): Promise<SigningOrder[] | never[]> => {
     const reader = new FileReader();
     let signingOrders: SigningOrder[] = [];
@@ -44,6 +54,13 @@ const FileLoad: React.FC<FileUploadProps> = (props: FileUploadProps) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         signingOrders = XLSX.utils.sheet_to_json(worksheet);
+
+        signingOrders = signingOrders.map(order => {
+          if (order.closingDate) { // Replace 'dateField' with the actual field name
+            order.closingDate = excelDateToJSDate(order.closingDate);
+          }
+          return order;
+        });
         
       }
     };
