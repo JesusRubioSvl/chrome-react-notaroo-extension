@@ -8,12 +8,14 @@ import { Button, darken, lighten, styled } from "@mui/material";
 interface FileDisplayProps {
     orders: Array<SigningOrder>;
     handleInsert: (signingOrder: SigningOrder, signingOrders: Array<SigningOrder>) => void;
+    canLoadValues: boolean;
   }
   
   const FileDisplay: React.FC<FileDisplayProps> = (props: FileDisplayProps) => {
     
     const [orders, setOrders] = useState<Array<SigningOrder>>(props.orders);
     const [page, setPage] = useState<number>(0);
+    const [showInsertButton, setShowInsertButton] = useState<boolean>(false);
     const apiRef = useGridApiRef();
 
     const getBackgroundColor = (color: string, mode: string) =>
@@ -88,14 +90,17 @@ interface FileDisplayProps {
           apiRef.current.selectRow(firstUnimportedOrder.escrowNumber, true, false);
         }
       }
-    }, [page, orders, apiRef]);
+    }, [page, orders, apiRef, props.canLoadValues]);
 
     useEffect(() => {
       if(orders.length > 0){
         const index = orders.findIndex(order => order.hasBeenImported !== true);
-        if (index) {
+        console.log('Index:', index);
+        if (index >= 0) {
           const page = Math.floor(index / 5);
           setPage(page);
+        }else{
+          setPage(0);
         }
       }
     }, [apiRef, orders]);
@@ -117,7 +122,8 @@ interface FileDisplayProps {
                 apiRef={apiRef}
                 getRowClassName={(params) => `hasBeenImported--${params.row.hasBeenImported ?? false}`}
             />
-            {orders.length > 0 && <div className="filedisplay-container">
+            {orders.length > 0 && props.canLoadValues &&
+            <div className="filedisplay-container">
               <Button 
                 className="filedisplay-insertButton"
                 component="label"

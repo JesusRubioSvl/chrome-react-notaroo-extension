@@ -9,14 +9,14 @@ export function mapSigningType(signingType: string) {
         case 'HUD Partial Claim w/2 witnesses':
             return '*HUD Partial Claim w/2 witnesses - $167.00';
 
-        case 'Loan Mod. And HUD Partial Claim':
-            return '*Loan Mod. and HUD Partial Claim - $107.00';
+        case 'Loan Mod. and HUD Partial Claim':
+            return '*Loan Mod. and HUD Partial Claim - $117.00';
 
-        case 'Loan Mod. And HUD Partial Claim w/1 witness':
-            return '*Loan Mod. and HUD Partial Claim w/1 witness - $147.00';
+        case 'Loan Mod. and HUD Partial Claim w/1 witness':
+            return '*Loan Mod. and HUD Partial Claim w/1 witness - $157.00';
 
-        case 'Loan Mod. And HUD Partial Claim w/2 witnesses':
-            return '*Loan Mod. and HUD Partial Claim w/2 witnesses - $187.00';
+        case 'Loan Mod. and HUD Partial Claim w/2 witnesses':
+            return '*Loan Mod. and HUD Partial Claim w/2 witnesses - $197.00';
 
         case 'Loan Modification Agreement':
             return '*Loan Modification Agreement - $87.00';

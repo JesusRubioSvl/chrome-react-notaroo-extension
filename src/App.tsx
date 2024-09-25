@@ -9,6 +9,19 @@ function App() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [orders, setOrders] = useState<Array<SigningOrder>>([]);
   const [insertOrder, setInsertOrder] = useState<SigningOrder | null>(null);
+  const [canLoadValues, setCanLoadValues] = useState<boolean>(false);
+  const [tabTitle, setTabTitle] = useState<string>('');
+
+  useEffect(() => {
+    // Get the tab title when the component mounts
+    console.log('Tab title:', tabTitle);
+    if (tabTitle === 'Scheduling :: SigningOrder.com') {
+      setCanLoadValues(true);
+    } else {
+      setCanLoadValues(false);
+    }
+    
+  }, [tabTitle]);
 
   const handleFileLoad = (loadedFileName: string, signingOrders: Array<SigningOrder>) => {
     setFileName(loadedFileName);
@@ -95,9 +108,12 @@ function App() {
       chrome.tabs.sendMessage(
         tabs[0].id || 0,
         { type: 'GET_DOM', order: insertOrder } as DOMMessage,
-        (response: DOMMessageResponse) => {});
+        (response: DOMMessageResponse) => {
+          setTabTitle(response.title);
+        });
     });
   }, [insertOrder]);
+
 
   return (
     <div className="App">
@@ -113,6 +129,7 @@ function App() {
         <FileDisplay
           orders={orders}
           handleInsert={handleInsert}
+          canLoadValues={canLoadValues}
         />
       </div>
     </div>

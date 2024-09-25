@@ -34,14 +34,10 @@ const FileLoad: React.FC<FileUploadProps> = (props: FileUploadProps) => {
     setFileName(props.fileName);
   }, [props.fileName]);
 
-  const excelDateToJSDate = (date: string): string => {
-    const serial = Number(date);
-    const utc_days = Math.floor(serial - 25569);
-    const utc_value = utc_days * 86400;
-    const date_info = new Date(utc_value * 1000);
-  
-    return `${date_info.getMonth() + 1}/${date_info.getDate()+1}/${date_info.getFullYear()}`;
-  
+  const formatDateString = (date: string): string => {
+    const [month, day, year] = date.split('/').map(part => part.padStart(2, '0'));
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    return `${month}/${day}/${fullYear}`;
   };
 
   const readFile = (file: File): Promise<SigningOrder[] | never[]> => {
@@ -53,11 +49,11 @@ const FileLoad: React.FC<FileUploadProps> = (props: FileUploadProps) => {
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        signingOrders = XLSX.utils.sheet_to_json(worksheet);
+        signingOrders = XLSX.utils.sheet_to_json(worksheet, {raw: false});
 
         signingOrders = signingOrders.map(order => {
           if (order.closingDate) { // Replace 'dateField' with the actual field name
-            order.closingDate = excelDateToJSDate(order.closingDate);
+            order.closingDate = formatDateString(order.closingDate);
           }
           return order;
         });

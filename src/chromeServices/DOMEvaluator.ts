@@ -166,11 +166,13 @@ const messagesFromReactAppListener = (
       .catch(error => {
         console.error(error);
       });
-      // Prepare the response object with information about the site
-      const response: DOMMessageResponse = {};
-
-      sendResponse(response);
   }
+  // Prepare the response object with information about the site
+  const response: DOMMessageResponse = {
+    title: document.title
+  };
+
+  sendResponse(response);
 };
 
 // Function to inject a script into the webpage
