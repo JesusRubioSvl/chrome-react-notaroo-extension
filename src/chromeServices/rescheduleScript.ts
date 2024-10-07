@@ -39,7 +39,8 @@ import $ from 'jquery';
               if (!subscriptionKey) {
                 throw new Error('REACT_APP_RESCHEDULE_SUBSCRIPTION_KEY is not defined');
               }
-              xhr.setRequestHeader('Subcription-Key', subscriptionKey); //TODO Replace with the apim subscription key
+              xhr.setRequestHeader('Subscription-Key', subscriptionKey); //TODO Replace with the apim subscription key
+              xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
             },
             "success": function (data) {
                 if (data.success === true) {
