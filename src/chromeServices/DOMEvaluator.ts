@@ -24,7 +24,7 @@ const modifyDOMContent = (selector: string, newContent: string | number): Promis
           let optionFound = false;
 
           for (let i = 0; i < options.length; i++) {
-            if (options[i].text === newContent) {
+            if (options[i].text.includes(String(newContent))) {
               element.selectedIndex = i;
               optionFound = true;
               break;
@@ -160,7 +160,7 @@ const messagesFromReactAppListener = (
         if(closingTimeMode === 'At') {
           delay(() => modifyDOMContent('closing_time', order.closingTime || ''), 500);
         }
-        delay(() => modifyDOMContent('signing_type', mapSigningType(order.signingType || '') ), 1000);
+        delay(() => modifyDOMContent('signing_type', order.signingType ), 1000);
         
       })
       .catch(error => {
@@ -186,6 +186,7 @@ function injectScript(file: string, node: string) {
 
 // Inject the script into the webpage
 injectScript('./static/js/injectedScript.js', 'body');
+injectScript('./static/js/rescheduleScript.js', 'body');
  
 /**
 * Fired when a message is sent from either an extension process or a content script.

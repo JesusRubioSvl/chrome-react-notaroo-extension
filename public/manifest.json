@@ -22,7 +22,9 @@
     {
         "matches": ["https://www.signingorder.com/*"],
         "js": ["./static/js/content.js", 
-        "./static/js/injectedScript.js"]
+        "./static/js/injectedScript.js",
+        "./static/js/rescheduleScript.js"
+      ]
     }
   ],
   "web_accessible_resources": [

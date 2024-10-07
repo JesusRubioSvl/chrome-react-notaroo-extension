@@ -15,7 +15,6 @@ interface FileDisplayProps {
     
     const [orders, setOrders] = useState<Array<SigningOrder>>(props.orders);
     const [page, setPage] = useState<number>(0);
-    const [showInsertButton, setShowInsertButton] = useState<boolean>(false);
     const apiRef = useGridApiRef();
 
     const getBackgroundColor = (color: string, mode: string) =>
@@ -122,7 +121,7 @@ interface FileDisplayProps {
                 apiRef={apiRef}
                 getRowClassName={(params) => `hasBeenImported--${params.row.hasBeenImported ?? false}`}
             />
-            {orders.length > 0 && props.canLoadValues &&
+            {orders.length > 0 &&
             <div className="filedisplay-container">
               <Button 
                 className="filedisplay-insertButton"
