@@ -20,7 +20,7 @@
   ],
   "content_scripts": [
     {
-        "matches": ["https://www.signingorder.com/*"],
+        "matches": ["https://*.signingorder.com/*"],
         "js": ["./static/js/content.js", 
         "./static/js/injectedScript.js",
         "./static/js/rescheduleScript.js"
@@ -32,7 +32,7 @@
       "resources": [
         "static/js/injectedScript.js"
       ],
-      "matches": ["https://www.signingorder.com/*"]
+      "matches": ["https://*.signingorder.com/*"]
     }
   ]
 }

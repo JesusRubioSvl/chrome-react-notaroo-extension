@@ -9,7 +9,8 @@ import $ from 'jquery';
       if(rescheduleForm) {
         console.log('Injecting reschedule script into the webpage');
 
-        $('#reschedule-order').on('click', function(e) {
+        $('#reschedule-order-continue').on('click', function(e) {
+        //$('#reschedule-order').on('click', function(e) {
           const dataArray = $('#reschedule-order-form').serializeArray();
           const dataJson = dataArray.reduce((acc: { [key: string]: any }, item) => {
             const propertyName = item.name.replace('[', '_').replace(']', '');
